@@ -12,6 +12,7 @@ module Ahoy
       @request = options[:request] || @controller.try(:request)
       @visit_token = options[:visit_token]
       @user = options[:user]
+      @tenant = options[:tenant]
       @options = options
     end
 
@@ -51,6 +52,10 @@ module Ahoy
             user_id: user.try(:id),
             started_at: trusted_time(started_at),
           }.merge(visit_properties).select { |_, v| v }
+
+          if Ahoy.multitenant
+            data[:tenant_id] = tenant.try(:id)
+          end
 
           @store.track_visit(data)
 
@@ -99,7 +104,11 @@ module Ahoy
     end
 
     def new_visit?
-      Ahoy.cookies ? !existing_visit_token : visit.nil?
+      if Ahoy.multitenant
+        visit.nil? || visit && visit.tenant_id != tenant.try(:id)
+      else
+        Ahoy.cookies ? !existing_visit_token : visit.nil?
+      end
     end
 
     def new_visitor?
@@ -118,6 +127,12 @@ module Ahoy
 
     def user
       @user ||= @store.user
+    end
+    
+    def tenant
+      if Ahoy.multitenant
+        @tenant ||= @store.tenant
+      end
     end
 
     def visit_properties

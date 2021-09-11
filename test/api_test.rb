@@ -31,6 +31,47 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal visitor_token, visit.visitor_token
   end
 
+  def test_tenant_visit
+    with_options(multitenant: true) do
+      Tenant.create!(name: "First tenant")
+      visit_token = random_token
+      visitor_token = random_token
+
+      post ahoy_engine.visits_url, params: { visit_token: visit_token, visitor_token: visitor_token, tenant_id: 1 }
+      assert_response :success
+      
+      body = JSON.parse(response.body)
+      expected_body = {
+        'visit_token' => visit_token,
+        'visitor_token' => visitor_token,
+        'visit_id' => visit_token,
+        'visitor_id' => visitor_token,
+        'tenant_id' => 1
+      }
+      assert_equal expected_body, body
+      
+      Tenant.create!(name: "Second tenant")
+      post ahoy_engine.visits_url, params: { visit_token: visit_token, visitor_token: visitor_token, tenant_id: 2 }
+
+      body = JSON.parse(response.body)
+      expected_body2 = {
+        'visit_token' => visit_token,
+        'visitor_token' => visitor_token,
+        'visit_id' => visit_token,
+        'visitor_id' => visitor_token,
+        'tenant_id' => 2
+      }
+
+      assert_equal expected_body2, body
+
+      assert_equal 2, Ahoy::Visit.count
+
+      visit = Ahoy::Visit.last
+      assert_equal visit_token, visit.visit_token
+      assert_equal visitor_token, visit.visitor_token
+    end
+  end
+
   def test_event
     visit = random_visit
 

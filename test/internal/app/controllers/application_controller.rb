@@ -5,4 +5,8 @@ class ApplicationController < ActionController::Base
   def run_before_action
     self.ran_before_action = true
   end
+
+  def current_tenant
+    params[:tenant_id] ? Tenant.find(params[:tenant_id]) : nil
+  end
 end

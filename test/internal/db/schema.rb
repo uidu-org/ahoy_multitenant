@@ -8,6 +8,7 @@ ActiveRecord::Schema.define do
 
     # user
     t.references :user
+    t.references :tenant
 
     # standard
     t.string :ip
@@ -43,7 +44,7 @@ ActiveRecord::Schema.define do
     t.datetime :started_at
   end
 
-  add_index :ahoy_visits, [:visit_token], unique: true
+  add_index :ahoy_visits, [:visit_token, :tenant_id], unique: true
 
   create_table :ahoy_events do |t|
     t.references :visit
@@ -62,6 +63,10 @@ ActiveRecord::Schema.define do
   end
 
   create_table :users do |t|
+    t.string :name
+  end
+
+  create_table :tenants do |t|
     t.string :name
   end
 end

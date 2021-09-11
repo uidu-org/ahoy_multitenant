@@ -71,6 +71,14 @@ module Ahoy
     (controller.respond_to?(:current_user, true) && controller.send(:current_user)) || (controller.respond_to?(:current_resource_owner, true) && controller.send(:current_resource_owner)) || nil
   end
 
+  mattr_accessor :multitenant
+  self.multitenant = false
+
+  mattr_accessor :tenant_method
+  self.tenant_method = lambda do |controller|
+    (controller.respond_to?(:current_tenant, true) && controller.send(:current_tenant)) || nil
+  end
+
   mattr_accessor :exclude_method
 
   mattr_accessor :track_bots

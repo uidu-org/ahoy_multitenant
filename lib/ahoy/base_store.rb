@@ -35,6 +35,20 @@ module Ahoy
       end
     end
 
+    def tenant
+      @tenant ||= begin
+        if Ahoy.tenant_method.respond_to?(:call)
+          if Ahoy.tenant_method.arity == 1
+            Ahoy.tenant_method.call(controller)
+          else
+            Ahoy.tenant_method.call(controller, request)
+          end
+        else
+          controller.send(Ahoy.tenant_method) if controller.respond_to?(Ahoy.tenant_method, true)
+        end
+      end
+    end
+
     def exclude?
       (!Ahoy.track_bots && bot?) || exclude_by_method?
     end
