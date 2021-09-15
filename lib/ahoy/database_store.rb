@@ -54,7 +54,11 @@ module Ahoy
     def visit
       if Ahoy.multitenant
         unless defined?(@visit)
-          @visit = visit_model.find_by(visit_token: ahoy.visit_token, tenant_id: ahoy.tenant.id) if ahoy.visit_token
+          @visit = visit_model.find_by(
+            visit_token: ahoy.visit_token,
+            tenant_id: ahoy.tenant.id,
+            user_id: ahoy.user.id
+          ) if ahoy.visit_token
         end
         @visit
       else
@@ -68,7 +72,7 @@ module Ahoy
     # if we don't have a visit, let's try to create one first
     def visit_or_create(started_at: nil)
       if Ahoy.multitenant
-        if !visit && Ahoy.server_side_visits || visit && visit.tenant != tenant
+        if !visit && Ahoy.server_side_visits || visit && visit.tenant_id != tenant.id && visit.user != user
           ahoy.track_visit(started_at: started_at)
         end
         visit

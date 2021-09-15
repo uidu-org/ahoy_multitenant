@@ -105,7 +105,7 @@ module Ahoy
 
     def new_visit?
       if Ahoy.multitenant
-        visit.nil? || visit && visit.tenant_id != tenant.try(:id)
+        visit.nil? || visit && visit.tenant_id != tenant.try(:id) && visit.user_id != user.try(:id)
       else
         Ahoy.cookies ? !existing_visit_token : visit.nil?
       end

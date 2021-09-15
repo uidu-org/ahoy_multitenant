@@ -72,6 +72,24 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
   end
 
+  def test_automatic_switch_tenant_and_user
+    with_options(multitenant: true, user_method: :multitenant_user) do
+      user1 = User.create!
+      tenant1 = Tenant.create!(name: "First tenant")
+      get products_url(tenant_id: tenant1.id, user_id: user1.id)
+      
+      user2 = User.create!
+      tenant2 = Tenant.create!(name: "Second tenant")
+      get products_url(tenant_id: tenant2.id, user_id: user2.id)
+
+      assert_equal 2, Ahoy::Visit.count
+      assert_equal tenant1.id, Ahoy::Visit.first.tenant_id
+      assert_equal user1.id, Ahoy::Visit.first.user_id
+      assert_equal tenant2.id, Ahoy::Visit.last.tenant_id
+      assert_equal user2.id, Ahoy::Visit.last.user_id
+    end
+  end
+
   def test_event
     visit = random_visit
 
