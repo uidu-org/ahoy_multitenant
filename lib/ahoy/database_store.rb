@@ -56,7 +56,7 @@ module Ahoy
         unless defined?(@visit)
           @visit = visit_model.find_by(
             visit_token: ahoy.visit_token,
-            tenant_id: ahoy.tenant.id
+            tenant_id: ahoy.tenant.try(:id)
           ) if ahoy.visit_token
         end
         @visit
