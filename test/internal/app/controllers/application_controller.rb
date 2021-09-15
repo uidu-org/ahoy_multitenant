@@ -7,6 +7,6 @@ class ApplicationController < ActionController::Base
   end
 
   def current_tenant
-    params[:tenant_id] ? Tenant.find(params[:tenant_id]) : nil
+    Ahoy.multitenant && params[:tenant_id] ? Tenant.find(params[:tenant_id]) : nil
   end
 end

@@ -33,4 +33,8 @@ class ProductsController < ApplicationController
   def true_user
     @true_user ||= User.create!(name: "True User")
   end
+
+  def multitenant_user
+    @multitenant_user ||= User.find(params[:user_id])
+  end
 end
